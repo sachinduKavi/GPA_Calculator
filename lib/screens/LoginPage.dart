@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gpa_calculator/Domain.dart';
+import 'package:gpa_calculator/SQL_helper.dart';
+import 'package:gpa_calculator/UploadData.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _readCurrentUser() async{
     final sp =  await SharedPreferences.getInstance();
-    String? userEmail = sp.getString("userEmail");
+    String? userEmail = sp.getString("user_email");
     print('User: ' + userEmail.toString());
 
     if(userEmail != null)
@@ -29,8 +31,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    // TODO: implement initState
     _readCurrentUser();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
       body: Stack(
@@ -125,6 +132,47 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
+
+              Container(
+                margin: const EdgeInsets.only(top: 10),
+                child: InkWell(
+                  onTap: () {
+                    showDialog(context: context, builder: (BuildContext context) {
+                        return AlertDialog(
+                          icon: const Icon(Icons.warning, color: Colors.red, size: 45,),
+                          title: const Text("You will not be able to save your data in the server if you skip registration. It is recommend to create a new account and login"),
+                          content: Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                // Continue button
+                                ElevatedButton(onPressed: () {
+                                  regSkip();
+                                },
+                                    style: ButtonStyle(
+                                      backgroundColor: MaterialStateColor.resolveWith((states) => Colors.blue),
+                                    ),
+                                    child: const Text("Continue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),)),
+
+                                // Cancel button
+                                ElevatedButton(onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                    style: ButtonStyle(
+                                      backgroundColor: MaterialStateColor.resolveWith((states) => Colors.red)
+                                    ),
+                                    child: const Text("Cancel"))
+                              ],
+                            ),
+                          ),
+                        );
+                    });
+
+                  },
+                  child: const Text("Skip Registration", style: TextStyle(color: Colors.red, fontSize: 15, fontWeight: FontWeight.bold),),
+                ),
+              )
+
               ]
           ),
           Container(
@@ -135,13 +183,42 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text("GPA Calculator", style: TextStyle(fontSize: 40, color: Color(0xFF0E4E67), fontWeight: FontWeight.bold),),
-                Text("Make your dreams come true", style: TextStyle(color: Color(0xFFFE9004), fontWeight: FontWeight.bold, fontSize: 15))
+                Text("Keep track on your success", style: TextStyle(color: Color(0xFFFE9004), fontWeight: FontWeight.bold, fontSize: 15))
               ],
             ),
           )
         ]
       ),
     );
+  }
+
+  // Passing account authorization and registration
+  // Guest users are allowed in the app
+  // But guest users wont be able to sync with the cloud data base
+  // Application will limited to local storage database
+  Future<void> regSkip() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString("user_email", "null");
+    // Initiation of local database
+    var scaleList = {
+      "A+": 4.0,
+      "A": 4.0,
+      "A-": 3.7,
+      "B+": 3.3,
+      "B": 3.0,
+      "B-": 2.7,
+      "C+": 2.3,
+      "C": 2.0,
+      "C-": 1.7,
+      "D+": 1.3,
+      "D": 1.0,
+      "E": 0.0,
+    };
+
+    for (final entry in scaleList.entries) {
+      await SQLHelper.insertScale(entry.key, entry.value);
+    }
+    Navigator.of(context).pushNamed("degree");
   }
 
   // Password authorization check email and password from the API
@@ -162,17 +239,74 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future requestServerAuthorization(String email, String password) async{
-    showDialog(context: context, builder: (context) {
-      return const Center(child: CircularProgressIndicator(),);
+    showDialog(context: context,
+        barrierDismissible: false,
+        builder: (context) {
+      return const Center(child: CircularProgressIndicator(color: Colors.white,),);
     });
     final sp = await SharedPreferences.getInstance();
-    sp.setString("userEmail", email);
-    var response = await http.get(Uri.parse('${Domain.mainDomain}users/userAuthorization/$email/$password'));
-    print(response.body);
-    Navigator.of(context).pop();
-    var result = jsonDecode(response.body);
-    if(result['authorized']) {
-      Navigator.of(context).pushNamed("degree");
+
+    try{
+      var response = await http.get(Uri.parse(
+          '${Domain.mainDomain}users/userAuthorization/$email/$password'));
+      print(response.body);
+      Navigator.of(context).pop();
+      var result = jsonDecode(response.body);
+      if (result['authorized']) {
+        await UploadData.downloadResults(result['result'][0]['email']);
+        sp.setString("degree_name", result['result'][0]['degree']);
+        sp.setString("user_email", result['result'][0]['email']);
+
+        // Initiation of local database
+        var scaleList = {
+          "A+": 4.0,
+          "A": 4.0,
+          "A-": 3.7,
+          "B+": 3.3,
+          "B": 3.0,
+          "B-": 2.7,
+          "C+": 2.3,
+          "C": 2.0,
+          "C-": 1.7,
+          "D+": 1.3,
+          "D": 1.0,
+          "E": 0.0,
+        };
+
+        for (final entry in scaleList.entries) {
+          await SQLHelper.insertScale(entry.key, entry.value);
+        }
+
+        Navigator.of(context).pushNamed("degree");
+      } else {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                  icon: Icon(
+                    Icons.error,
+                    color: Colors.red,
+                    size: 45,
+                  ),
+                  title: Text("Account authorization faild"),
+                  content: Text(
+                    result['message'],
+                    style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red),
+                  ));
+            });
+      }
+    }catch(e) {
+      Navigator.of(context).pop();
+      print('Error : $e');
+      showDialog(context: context, builder: (BuildContext context){
+        return const AlertDialog(
+          icon: Icon(Icons.wifi_tethering_error_sharp, color: Colors.red, size: 45,),
+          title: Text("Sorry, can't connect to the server, please check your internet connection and try again.", style: TextStyle(fontSize: 22, color: Colors.red),),
+        );
+      });
     }
   }
 }

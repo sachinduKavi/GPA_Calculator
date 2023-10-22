@@ -126,6 +126,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
   Widget formPassword02(String hintText) {
     return TextFormField(
+      textCapitalization: TextCapitalization.words,
       maxLength: 20,
       obscureText: true,
       validator: (text) {
@@ -221,13 +222,26 @@ class _CreateAccountState extends State<CreateAccount> {
         } else {
           print ("Error Occur");
         }
+        Navigator.of(context).pop();
+        Navigator.of(context).pushNamed("loginPage");
       } catch (exception) {
         print(exception);
+        showDialog(context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context){
+          return AlertDialog(
+            icon: Icon(Icons.wifi_tethering_error_sharp, color: Colors.red, size: 45,),
+            title: Text("Sorry, can't connect to the server, please check your internet connection and try again.", style: TextStyle(fontSize: 22, color: Colors.red),),
+            content: Container(
+              child: ElevatedButton(onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed("loginPage");
+              }, child: Text("Ok")),
+            ),
+          );
+        });
       }
     }
-
-    Navigator.of(context).pop();
-    Navigator.of(context).pushNamed("loginPage");
 
   }
 }
