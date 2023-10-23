@@ -97,7 +97,6 @@ class _ResultsState extends State<Results> {
 
 
   void addModule(int courseId, String moduleName, int credits, String grade) {
-
     setState(() {
       moduleList.add(
           Container(
@@ -120,7 +119,7 @@ class _ResultsState extends State<Results> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(moduleName, style: const TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold), softWrap: true,),
+                    Expanded(child: Text(moduleName, style: const TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold), softWrap: true,)),
                     InkWell(
                       onTap: () {
                         changeCount++;
@@ -290,6 +289,7 @@ class _ResultsState extends State<Results> {
                               Container(
                                 margin: const EdgeInsets.all(10),
                                 child: TextField(
+                                  textCapitalization: TextCapitalization.words,
                                   controller: moduleNameController,
                                     decoration: const InputDecoration(
                                         hintText: "Module Name",

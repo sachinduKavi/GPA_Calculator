@@ -131,11 +131,12 @@ class _Degree01State extends State<Degree01> {
                   padding: const EdgeInsets.all(10),
                   margin: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
+                    // color: const Color(0xFFD9D9D9),
                       border: Border.all(
-                          width: 2,
-                          color: const Color(0xFF707070)
+                        color: Colors.activeColor,
+                          width: 3,
                       ),
-                      borderRadius: const BorderRadius.all(Radius.circular(18))
+                      borderRadius: const BorderRadius.all(Radius.circular(14))
                   ),
                   child: Text("Year: $year", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.activeColor),),
                 ),
@@ -166,7 +167,7 @@ class _Degree01State extends State<Degree01> {
                   return InkWell(
                     onTap: () {
                       // semesterClick(yearNo, index+1);
-                      print("$year $index");
+                      // print("$year $index");
                       Navigator.of(context).push(MaterialPageRoute(builder: (_){
                         return Results(year, index+1, degreeName);
                       }));
@@ -291,14 +292,13 @@ class _Degree01State extends State<Degree01> {
         backgroundColor: Colors.activeColor,
         child: const Icon(Icons.add),
       ),
-      drawer: NavigationDrawer(
+      drawer: Drawer(
+        elevation: 200,
         backgroundColor: const Color(0xFF3C4B55),
+        child:Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-
-        Container(
-          height: 100,
-        ),
-
           Container(
             margin: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -337,6 +337,7 @@ class _Degree01State extends State<Degree01> {
               title: const Text("About", style: TextStyle(fontSize: 20, color: Colors.white),),
               onTap: () {
                 print("Some click");
+                Navigator.of(context).pushNamed("about");
               },
             ),
           ),
@@ -356,7 +357,9 @@ class _Degree01State extends State<Degree01> {
           ),
 
 
-      ],),
+      ],
+    ),
+    )
     );
   }
 

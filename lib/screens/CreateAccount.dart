@@ -18,13 +18,14 @@ class _CreateAccountState extends State<CreateAccount> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   // ignore: prefer_final_fields
-  late String _name, _email, _password, _password02, _university, _degree;
+  late String _name, _email, _password, _password02, _university, _degree, _mobile;
 
 
 
 // Widget formText method that returns a widget
   Widget formName(String hintText) {
     return TextFormField(
+      textCapitalization: TextCapitalization.words,
       maxLength: 20,
       validator: (text) {
         if (text!.isEmpty) {
@@ -45,7 +46,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
   Widget formEmail(String hintText) {
     return TextFormField(
-      maxLength: 20,
+      maxLength: 35,
       validator: (text) {
         if (text!.isEmpty) {
           return "Please Enter Value";
@@ -63,8 +64,31 @@ class _CreateAccountState extends State<CreateAccount> {
     );
   }
 
+  Widget formMobile(String hintText) {
+    return TextFormField(
+      keyboardType: TextInputType.number,
+      textCapitalization: TextCapitalization.words,
+      maxLength: 20,
+      validator: (text) {
+        if (text!.isEmpty) {
+          return "Please Enter Value";
+        }
+        return null;
+      },
+      onSaved: (text) {
+        print(text);
+        _mobile = text!;
+      },
+      decoration: InputDecoration(
+          hintText: hintText,
+          labelText: "Enter your $hintText"
+      ),
+    );
+  }
+
   Widget formUniversity(String hintText) {
     return TextFormField(
+      textCapitalization: TextCapitalization.words,
       maxLength: 30,
       validator: (text) {
         if (text!.isEmpty) {
@@ -85,6 +109,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
   Widget formDegree(String hintText) {
     return TextFormField(
+      textCapitalization: TextCapitalization.words,
       maxLength: 30,
       validator: (text) {
         if (text!.isEmpty) {
@@ -126,7 +151,6 @@ class _CreateAccountState extends State<CreateAccount> {
 
   Widget formPassword02(String hintText) {
     return TextFormField(
-      textCapitalization: TextCapitalization.words,
       maxLength: 20,
       obscureText: true,
       validator: (text) {
@@ -168,6 +192,10 @@ class _CreateAccountState extends State<CreateAccount> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(5),
+                  child: formMobile("Mobile"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(5),
                   child: formPassword("Password"),
                 ),
                 Padding(
@@ -183,20 +211,24 @@ class _CreateAccountState extends State<CreateAccount> {
                   child: formDegree("Degree Program"),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(25),
-                  child: ElevatedButton(onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      print("Valid Form");
-                      _formKey.currentState!.save();
-                      postData();
-                    } else {
-                      print("Invalid Form");
-                    }
+                  padding: const EdgeInsets.all(20),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                        onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        print("Valid Form");
+                        _formKey.currentState!.save();
+                        postData();
+                      } else {
+                        print("Invalid Form");
+                      }
 
-                  },
-                      child: const Padding(
-                      padding: EdgeInsets.only(left: 25, right: 25),
-                      child: Text("SIGN UP", style: TextStyle(fontSize: 25),))),
+                    },
+                        child: const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Text("SIGN UP", style: TextStyle(fontSize: 25),))),
+                  ),
                 )
               ],
             ),
@@ -215,7 +247,7 @@ class _CreateAccountState extends State<CreateAccount> {
       // Posting values in the sever to store in the database
       try {
         var response = await http.post(Uri.parse('${Domain.mainDomain}/users/addUserDetails'),
-        body: {"userName": _name, "email": _email, "password": _password, "university": _university, "degree": _degree}
+        body: {"userName": _name, "email": _email, "password": _password, "university": _university, "degree": _degree, "mobile": _mobile}
         );
         if(response.statusCode == 201) {
           print(response.body);
