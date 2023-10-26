@@ -28,7 +28,7 @@ class _ResultsState extends State<Results> {
   List<Widget> moduleList = [];
   List resultData = [];
   Map<String, double> scaleMap = {};
-  List<String> gradeList = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "E+", "E", "NGPA"];
+  List<String> gradeList = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "E"];
   String selectedValue = "A+";
   TextEditingController moduleNameController = TextEditingController();
   TextEditingController creditController = TextEditingController();
@@ -160,7 +160,7 @@ class _ResultsState extends State<Results> {
   @override
   Widget build(BuildContext context) {
     late String classType;
-    print('Calculated GPA : $finalGpa');
+    finalGpa = double.parse(finalGpa.toStringAsFixed(2));
     if(finalGpa >= 3.7) {
       classType = "1st Class";
     } else if (finalGpa >= 3.3){
@@ -170,6 +170,7 @@ class _ResultsState extends State<Results> {
     }else {
       classType = "Ordinary";
     }
+    print('Calculated GPA : $finalGpa   $classType');
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -360,7 +361,7 @@ class _ResultsState extends State<Results> {
                                       changeCount++;
                                       print('${moduleNameController.text} ${creditController.text} $selectedValue working');
                                       // addModule(moduleNameController.text, int.parse(creditController.text), selectedValue);
-                                      _addResultSql(moduleNameController.text, int.parse(creditController.text), selectedValue);
+                                      _addResultSql(moduleNameController.text.trim(), int.parse(creditController.text), selectedValue);
                                       print('Record Added');
                                       setState(() {
                                         moduleNameController.text = "";

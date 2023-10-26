@@ -146,7 +146,11 @@ class _Degree01State extends State<Degree01> {
                     "\nTotal Credits: ${(gpaCreditValueList[year-1][0][1]+gpaCreditValueList[year-1][1][1]).toStringAsFixed(0)}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
 
                 // Close cross button
-                const Icon(Icons.close, color: Colors.red,)
+                // const Icon(Icons.close, color: Colors.red,)
+                const SizedBox(
+                  width: 50,
+                  height: 10,
+                )
               ],
             ),
 
@@ -264,7 +268,7 @@ class _Degree01State extends State<Degree01> {
                     children: [
                       Text(classType, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF9F9F9F))),
 
-                      Text(gpaCalculated.toStringAsFixed(2), style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold),),
+                      Text(gpaCalculated.toStringAsFixed(3), style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold),),
 
                       const Text("Total GPA", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF9F9F9F))),
                     ],

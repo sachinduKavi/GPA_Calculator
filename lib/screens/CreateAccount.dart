@@ -241,13 +241,15 @@ class _CreateAccountState extends State<CreateAccount> {
   Future postData() async {
     // Waiting circle
     if (_password == _password02) {
-      showDialog(context: context, builder: (context) {
-        return const Center(child: CircularProgressIndicator(),);
+      showDialog(context: context,
+          barrierDismissible: false,
+          builder: (context) {
+        return const Center(child: CircularProgressIndicator(color: Colors.white,),);
       });
       // Posting values in the sever to store in the database
       try {
         var response = await http.post(Uri.parse('${Domain.mainDomain}/users/addUserDetails'),
-        body: {"userName": _name, "email": _email, "password": _password, "university": _university, "degree": _degree, "mobile": _mobile}
+        body: {"userName": _name.trim(), "email": _email.trim().toLowerCase(), "password": _password.trim(), "university": _university.trim(), "degree": _degree.trim(), "mobile": _mobile.trim()}
         );
         if(response.statusCode == 201) {
           print(response.body);
@@ -273,6 +275,13 @@ class _CreateAccountState extends State<CreateAccount> {
           );
         });
       }
+    } else {
+      showDialog(context: context, builder: (BuildContext context) {
+        return const AlertDialog(
+          icon: Icon(Icons.error_outline, color: Colors.red, size: 50,),
+          title: Text("Password Mismatched", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.red),),
+        );
+      });
     }
 
   }
